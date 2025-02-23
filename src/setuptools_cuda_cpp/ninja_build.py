@@ -118,7 +118,12 @@ def _write_ninja_file(path,
     # Version 1.3 is required for the `deps` directive.
     config = ['ninja_required_version = 1.3', f'cxx = {compiler}']
     if with_cuda:
-        nvcc = str(CUDA_HOME / 'bin' / 'nvcc')
+        if os.environ.get("WITH_SCCACHE") is not None:
+            # If we are using sccache, we need to use the nvcc wrapper
+            # script that is provided by sccache.
+            nvcc = '/usr/local/bin/sccache ' + str(CUDA_HOME / 'bin' / 'nvcc')
+        else:
+            nvcc = str(CUDA_HOME / 'bin' / 'nvcc')
         config.append(f'nvcc = {nvcc}')
 
     flags = [f'cflags = {" ".join(cflags)}', f'post_cflags = {" ".join(post_cflags)}']
